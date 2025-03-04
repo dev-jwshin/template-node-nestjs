@@ -33,7 +33,7 @@ import { FileLogger } from './config/typeorm/file-logger';
         port: configService.databasePort || 3306,
         username: configService.databaseUsername || 'root',
         password: configService.databasePassword || '',
-        database: configService.databaseName || 'manito-dev',
+        database: configService.databaseName || 'template-node-nestjs-dev',
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: !configService.isProduction,
         logging: !configService.isProduction ? ['query', 'error', 'schema', 'migration'] : false,
