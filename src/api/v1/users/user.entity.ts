@@ -13,6 +13,9 @@ export class User implements EntityType {
   @Column()
   email: string;
 
+  @Column()
+  password: string;
+
   @Column({ default: true })
   isActive: boolean;
 
