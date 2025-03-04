@@ -31,6 +31,11 @@ export class AuthController {
       throw new BadRequestException('이미 존재하는 이메일입니다.');
     }
 
+    // 비밀번호 일치 여부 확인
+    if (data.password !== data.passwordConfirm) {
+      throw new BadRequestException('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+    }
+
     // 비밀번호 암호화
     const hashedPassword = await hash(data.password, 10);
 

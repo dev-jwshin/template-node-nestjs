@@ -12,6 +12,8 @@ export const postFactory = Factory.define<Post>(({ sequence, associations }) => 
     content: faker.lorem.paragraph(),
     published: false,
     authorId: author.id,
-    author: author,
-  };
+    author,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Post;
 });

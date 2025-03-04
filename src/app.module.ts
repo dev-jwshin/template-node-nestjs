@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import configuration from './config/configuration';
 import { validationSchema } from './config/env.validation';
 import { ConfigurationModule } from './config/config.module';
@@ -10,6 +11,7 @@ import { AuthModule } from './api/v1/auth/auth.module';
 import { UsersModule } from './api/v1/users/users.module';
 import { PostsModule } from './api/v1/posts/posts.module';
 import { QueryParserModule } from './common/query-parser/query-parser.module';
+import { ResponseFilterInterceptor } from './common/interceptors/response-filter.interceptor';
 
 @Module({
   imports: [
@@ -42,6 +44,11 @@ import { QueryParserModule } from './common/query-parser/query-parser.module';
     PostsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseFilterInterceptor,
+    },
+  ],
 })
 export class AppModule {}

@@ -9,4 +9,6 @@ export const userFactory = Factory.define<User>(({ sequence }) => ({
   password: faker.internet.password(),
   isActive: true,
   posts: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
 }));
