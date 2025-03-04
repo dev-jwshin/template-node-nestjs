@@ -38,6 +38,7 @@ lerna-debug.log*
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # 빌드 파일
 /build
