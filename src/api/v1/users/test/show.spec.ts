@@ -2,11 +2,7 @@ import { User } from '../user.entity';
 import { userFactory } from './user.factory';
 import { postFactory } from '../../posts/test/post.factory';
 import { Post } from '../../posts/post.entity';
-import {
-  saveEntity,
-  testEndpoint,
-  createIncludeQueryParams,
-} from '../../../../config/test/test-utils';
+import { saveEntity, api } from '../../../../config/test/test-utils';
 
 describe('UsersController (E2E) - Show', () => {
   const API_ENDPOINT = '/api/v1/users';
@@ -17,7 +13,7 @@ describe('UsersController (E2E) - Show', () => {
       const user = await saveEntity<User>(User, userFactory.build());
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(API_ENDPOINT, user.id);
+      const response = await api().endpoint(API_ENDPOINT).id(user.id).get().execute();
 
       expect(response.body).toBeDefined();
       expect(response.body.id).toEqual(user.id);
@@ -28,7 +24,7 @@ describe('UsersController (E2E) - Show', () => {
       const nonExistentId = 9999;
 
       // HTTP 요청 보내기 및 응답 검증 (404 기대)
-      await testEndpoint(API_ENDPOINT, nonExistentId, {}, 404);
+      await api().endpoint(API_ENDPOINT).id(nonExistentId).get().expectStatus(404).execute();
     });
 
     it('should include related posts when requested', async () => {
@@ -40,7 +36,12 @@ describe('UsersController (E2E) - Show', () => {
       await saveEntity(Post, postFactory.build({ authorId: user.id, author: user }));
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(API_ENDPOINT, user.id, createIncludeQueryParams('posts'));
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .id(user.id)
+        .get()
+        .withInclude('posts')
+        .execute();
 
       expect(response.body).toBeDefined();
       expect(response.body.posts).toBeDefined();

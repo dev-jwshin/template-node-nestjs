@@ -2,14 +2,7 @@ import { User } from '../user.entity';
 import { userFactory } from './user.factory';
 import { postFactory } from '../../posts/test/post.factory';
 import { Post } from '../../posts/post.entity';
-import {
-  saveEntity,
-  saveEntities,
-  testEndpoint,
-  createFilterQueryParams,
-  createIncludeQueryParams,
-  createPaginationQueryParams,
-} from '../../../../config/test/test-utils';
+import { saveEntity, saveEntities, api } from '../../../../config/test/test-utils';
 
 describe('UsersController (E2E) - Index', () => {
   const API_ENDPOINT = '/api/v1/users';
@@ -21,7 +14,7 @@ describe('UsersController (E2E) - Index', () => {
       const users = await saveEntities<User>(User, usersData);
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(API_ENDPOINT);
+      const response = await api().endpoint(API_ENDPOINT).get().execute();
 
       expect(response.body).toHaveLength(3);
       expect(response.body.map(user => user.id)).toEqual(
@@ -36,11 +29,11 @@ describe('UsersController (E2E) - Index', () => {
       await saveEntity(User, userFactory.build({ name: '홍길동' }));
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createFilterQueryParams('name', '홍길동'),
-      );
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .get()
+        .withFilter('name', '홍길동')
+        .execute();
 
       expect(response.body).toHaveLength(2);
       expect(response.body.every(user => user.name === '홍길동')).toBe(true);
@@ -55,11 +48,7 @@ describe('UsersController (E2E) - Index', () => {
       await saveEntity(Post, postFactory.build({ authorId: user.id, author: user }));
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createIncludeQueryParams('posts'),
-      );
+      const response = await api().endpoint(API_ENDPOINT).get().withInclude('posts').execute();
 
       const foundUser = response.body.find(u => u.id === user.id);
       expect(foundUser).toBeDefined();
@@ -73,11 +62,7 @@ describe('UsersController (E2E) - Index', () => {
       await saveEntities<User>(User, usersData);
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createPaginationQueryParams(2, 10),
-      );
+      const response = await api().endpoint(API_ENDPOINT).get().withPagination(2, 10).execute();
 
       expect(response.body).toHaveLength(10);
     });

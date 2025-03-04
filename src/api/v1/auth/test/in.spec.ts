@@ -1,9 +1,9 @@
-import * as request from 'supertest';
 import { app, dataSource } from '../../../../config/test/jest.setup';
 import { Repository } from 'typeorm';
 import { User } from '../../users/user.entity';
 import { hash } from 'bcrypt';
-import { Post } from '../../posts/post.entity';
+import { api } from '../../../../config/test/test-utils';
+import * as request from 'supertest';
 
 describe('AuthController (E2E) - In', () => {
   const API_ENDPOINT = '/api/v1/auth/in';
@@ -34,10 +34,7 @@ describe('AuthController (E2E) - In', () => {
       };
 
       // HTTP 요청 및 응답 확인
-      const response = await request(app.getHttpServer())
-        .post(API_ENDPOINT)
-        .send(loginData)
-        .expect(200);
+      const response = await api().endpoint(API_ENDPOINT).post().body(loginData).execute();
 
       // 응답에 적절한 사용자 정보가 포함되어 있는지 확인
       expect(response.body).toBeDefined();
@@ -57,10 +54,12 @@ describe('AuthController (E2E) - In', () => {
       };
 
       // HTTP 요청 및 에러 응답 확인
-      const response = await request(app.getHttpServer())
-        .post(API_ENDPOINT)
-        .send(loginData)
-        .expect(401);
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .post()
+        .body(loginData)
+        .expectStatus(401)
+        .execute();
 
       // 에러 메시지 확인
       expect(response.body.message).toBe('존재하지 않는 이메일입니다.');
@@ -86,10 +85,12 @@ describe('AuthController (E2E) - In', () => {
       };
 
       // HTTP 요청 및 에러 응답 확인
-      const response = await request(app.getHttpServer())
-        .post(API_ENDPOINT)
-        .send(loginData)
-        .expect(401);
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .post()
+        .body(loginData)
+        .expectStatus(401)
+        .execute();
 
       // 에러 메시지 확인
       expect(response.body.message).toBe('비밀번호가 일치하지 않습니다.');
@@ -102,10 +103,12 @@ describe('AuthController (E2E) - In', () => {
       };
 
       // HTTP 요청 및 에러 응답 확인
-      const response = await request(app.getHttpServer())
-        .post(API_ENDPOINT)
-        .send(loginDataWithoutPassword)
-        .expect(400);
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .post()
+        .body(loginDataWithoutPassword)
+        .expectStatus(400)
+        .execute();
 
       // 에러 메시지 확인 - 메시지가 배열로 오는 경우 처리
       const errorMessages = Array.isArray(response.body.message)
@@ -141,8 +144,7 @@ describe('AuthController (E2E) - In', () => {
       // 로그인 요청
       await agent.post(API_ENDPOINT).send(loginData).expect(200);
 
-      // 세션이 유지되는지 확인하기 위해 인증이 필요한 엔드포인트 접근
-      // 이 테스트에서는 직접적으로 세션을 확인할 수 없으므로, 로그아웃 엔드포인트를 통해 간접적으로 확인
+      // 로그아웃 요청 - 세션이 유지되는지 확인
       const logoutResponse = await agent.post('/api/v1/auth/out').expect(200);
 
       // 로그아웃이 성공적으로 이루어졌다면 세션에 사용자 정보가 있었다는 의미

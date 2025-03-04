@@ -2,14 +2,7 @@ import { Post } from '../post.entity';
 import { postFactory } from './post.factory';
 import { userFactory } from '../../users/test/user.factory';
 import { User } from '../../users/user.entity';
-import {
-  saveEntity,
-  saveEntities,
-  testEndpoint,
-  createFilterQueryParams,
-  createIncludeQueryParams,
-  createPaginationQueryParams,
-} from '../../../../config/test/test-utils';
+import { saveEntity, saveEntities, api } from '../../../../config/test/test-utils';
 
 describe('PostsController (E2E) - Index', () => {
   const API_ENDPOINT = '/api/v1/posts';
@@ -24,7 +17,7 @@ describe('PostsController (E2E) - Index', () => {
       const posts = await saveEntities<Post>(Post, postsData);
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(API_ENDPOINT);
+      const response = await api().endpoint(API_ENDPOINT).get().execute();
 
       expect(response.body).toHaveLength(3);
       expect(response.body.map(post => post.id)).toEqual(
@@ -63,11 +56,11 @@ describe('PostsController (E2E) - Index', () => {
       );
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createFilterQueryParams('published', true),
-      );
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .get()
+        .withFilter('published', true)
+        .execute();
 
       expect(response.body).toHaveLength(2);
       expect(response.body.every(post => post.published === true)).toBe(true);
@@ -102,11 +95,11 @@ describe('PostsController (E2E) - Index', () => {
       );
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createFilterQueryParams('authorId', user1.id),
-      );
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .get()
+        .withFilter('authorId', user1.id)
+        .execute();
 
       expect(response.body).toHaveLength(2);
       expect(response.body.every(post => post.authorId === user1.id)).toBe(true);
@@ -126,11 +119,7 @@ describe('PostsController (E2E) - Index', () => {
       );
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createIncludeQueryParams('author'),
-      );
+      const response = await api().endpoint(API_ENDPOINT).get().withInclude('author').execute();
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].author).toBeDefined();
@@ -149,11 +138,7 @@ describe('PostsController (E2E) - Index', () => {
       await saveEntities<Post>(Post, postsData);
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        undefined,
-        createPaginationQueryParams(2, 10),
-      );
+      const response = await api().endpoint(API_ENDPOINT).get().withPagination(2, 10).execute();
 
       expect(response.body).toHaveLength(10);
     });

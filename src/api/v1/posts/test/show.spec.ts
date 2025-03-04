@@ -2,12 +2,7 @@ import { Post } from '../post.entity';
 import { postFactory } from './post.factory';
 import { userFactory } from '../../users/test/user.factory';
 import { User } from '../../users/user.entity';
-import {
-  saveEntity,
-  testEndpoint,
-  createFilterQueryParams,
-  createIncludeQueryParams,
-} from '../../../../config/test/test-utils';
+import { saveEntity, api } from '../../../../config/test/test-utils';
 
 describe('PostsController (E2E) - Show', () => {
   const API_ENDPOINT = '/api/v1/posts';
@@ -27,7 +22,7 @@ describe('PostsController (E2E) - Show', () => {
       );
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(API_ENDPOINT, post.id);
+      const response = await api().endpoint(API_ENDPOINT).id(post.id).get().execute();
 
       expect(response.body).toBeDefined();
       expect(response.body.id).toEqual(post.id);
@@ -38,7 +33,7 @@ describe('PostsController (E2E) - Show', () => {
       const nonExistentId = 9999;
 
       // HTTP 요청 보내기 및 응답 검증 (404 기대)
-      await testEndpoint(API_ENDPOINT, nonExistentId, {}, 404);
+      await api().endpoint(API_ENDPOINT).id(nonExistentId).get().expectStatus(404).execute();
     });
 
     it('should apply published filter when provided', async () => {
@@ -56,11 +51,12 @@ describe('PostsController (E2E) - Show', () => {
       );
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        post.id,
-        createFilterQueryParams('published', true),
-      );
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .id(post.id)
+        .get()
+        .withFilter('published', true)
+        .execute();
 
       expect(response.body).toBeDefined();
       expect(response.body.published).toBe(true);
@@ -80,11 +76,12 @@ describe('PostsController (E2E) - Show', () => {
       );
 
       // HTTP 요청 보내기 및 응답 검증
-      const response = await testEndpoint(
-        API_ENDPOINT,
-        post.id,
-        createIncludeQueryParams('author'),
-      );
+      const response = await api()
+        .endpoint(API_ENDPOINT)
+        .id(post.id)
+        .get()
+        .withInclude('author')
+        .execute();
 
       expect(response.body).toBeDefined();
       expect(response.body.author).toBeDefined();
